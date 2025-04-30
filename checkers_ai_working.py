@@ -7,13 +7,13 @@ import random
 from checkers.game import Game
 import pickle
 
-# Hyperparameters
-GAMMA = 0.99            # discount factor
+
+GAMMA = 0.99            # discount factor per iti
 BATCH_SIZE = 1          # episodes per update
 LR = 1e-3               # learning rate
-ITERATIONS = 10          # total policy‐gradient updates
-PRINT_EVERY = 1        # how often to print progress (in updates)
-MAX_STEPS = np.inf      # max moves per game to avoid infinite episodes
+ITERATIONS = 10          # total updates
+PRINT_EVERY = 1        
+MAX_STEPS = np.inf      
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -52,7 +52,7 @@ def get_reward(game):
 
 
 def compute_returns(rewards, gamma):
-    """Compute discounted returns."""
+    #Compute returns here with discount in plce
     R = 0.0
     returns = []
     for r in reversed(rewards):
@@ -62,12 +62,7 @@ def compute_returns(rewards, gamma):
 
 
 def train_policy(model, optimizer, device, batch_size, gamma, max_steps):
-    """
-    Play `batch_size` episodes (with random opponent),
-    collect log-probs and rewards up to max_steps,
-    then do one REINFORCE update with baseline.
-    Returns avg baseline (mean return) per episode.
-    """
+
     all_log_probs, all_returns = [], []
 
     for ep in range(batch_size):
@@ -118,7 +113,7 @@ def train_policy(model, optimizer, device, batch_size, gamma, max_steps):
 
     return baseline.item()
 
-
+#play against random
 def evaluate_against_random(model, device, games=200):
     model.eval()
     w = l = d = 0
@@ -158,14 +153,18 @@ class PolicyNet(nn.Module):
 
 
 def main():
+    #create model and optimizer
     model = PolicyNet().to(DEVICE)
     opt = optim.Adam(model.parameters(), lr=LR)
 
+    #begin training
     for it in range(1, ITERATIONS+1):
         avg_ret = train_policy(model, opt, DEVICE, BATCH_SIZE, GAMMA, MAX_STEPS)
         if it % PRINT_EVERY == 0:
             print(f"Update {it}: avg return {avg_ret:.3f}")
 
+
+    #evaluate
     evaluate_against_random(model, DEVICE)
     torch.save(model, "checkersModelBatch" + str(BATCH_SIZE) +"Iterations" + str(ITERATIONS) + ".pt", pickle_module=pickle, pickle_protocol=2)
 
