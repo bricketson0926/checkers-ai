@@ -27,7 +27,7 @@ def num_to_y(pos):
 def x_y_to_num(x, y):
     return y*4 + math.ceil((x+1)/2)
 
-
+#Return a tensor representing the board state
 def board_to_tensor(game, device):
     """Convert board pieces to a 32‑dim tensor."""
     arr = np.zeros(32, dtype=np.float32)
@@ -44,6 +44,7 @@ def board_to_tensor(game, device):
 def run_checkers_gui(model):
 
     def draw_board(selected=-1):
+        #Create Array of Squares
         for i in range(8):
             for j in range(8):
                 color = "sienna4" if (i + j) % 2 == 0 else "sandy brown"
@@ -54,6 +55,7 @@ def run_checkers_gui(model):
                     (i + 1) * CELL_SIZE,
                     fill=color
                 )
+        #Create circle for every piece still in play
         for piece in GAME.board.pieces:
             if piece.captured == False:
                 x = num_to_x(piece.position)
